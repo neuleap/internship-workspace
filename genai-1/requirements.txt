@@ -1,7 +1,17 @@
-google-generativeai==0.2.0
-psycopg2-binary==2.9.9
-python-dotenv==1.0.0
-streamlit==1.27.2
-sqlalchemy==2.0.21
-python-dotenv==1.0.0
-requests==2.31.0
+# Core dependencies for Northwind Database Insights Assistant
+streamlit>=1.28.0
+groq>=0.4.0
+python-dotenv>=1.0.0
+pandas>=2.0.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Development dependencies (optional)
+pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Documentation dependencies (optional)
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
