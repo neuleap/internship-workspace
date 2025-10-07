@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from groq import Groq
 from dotenv import load_dotenv
 import os
 
@@ -7,37 +7,9 @@ load_dotenv()
 class SQLQueryGenerator:
     def __init__(self, schema_info: dict, api_key: str):
         self.schema_info = schema_info
-        genai.configure(api_key=api_key)
-        # Configure safety settings
-        generation_config = {
-            "temperature": 0.0,
-            "top_p": 1,
-            "top_k": 1,
-            "max_output_tokens": 2048,
-        }
-        safety_settings = [
-            {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_NONE",
-            },
-            {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_NONE",
-            },
-            {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_NONE",
-            },
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_NONE",
-            },
-        ]
-        self.model = genai.GenerativeModel(
-            model_name="models/gemini-2.0-pro-exp",  # Using a supported model from the list
-            generation_config=generation_config,
-            safety_settings=safety_settings
-        )
+        self.client = Groq(api_key=api_key)
+        # Updated to use a current supported model
+        self.model_name = "llama-3.3-70b-versatile"  # Changed from llama-3.1-70b-versatile
 
     def generate_query(self, question: str) -> str:
         """Generate SQL query from natural language question"""
@@ -53,11 +25,29 @@ class SQLQueryGenerator:
         The query should be correct, efficient, and follow PostgreSQL syntax."""
 
         try:
-            response = self.model.generate_content(prompt)
-            if response.parts:
-                return self._extract_sql_query(response.text)
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert SQL query generator. Return only valid SQL queries without explanations."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                model=self.model_name,
+                temperature=0.0,
+                max_tokens=1024,
+                top_p=1,
+                stream=False
+            )
+            
+            if chat_completion.choices:
+                return self._extract_sql_query(chat_completion.choices[0].message.content)
             else:
                 raise Exception("No response generated from the model")
+                
         except Exception as e:
             raise Exception(f"Error generating SQL query: {str(e)}")
 

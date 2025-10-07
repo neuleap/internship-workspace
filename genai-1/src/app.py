@@ -17,12 +17,22 @@ def init_db():
 def init_query_generator(schema_info):
     return SQLQueryGenerator(
         schema_info=schema_info,
-        api_key=os.getenv('GOOGLE_API_KEY')
+        api_key=os.getenv('GROQ_API_KEY')
     )
 
 def main():
-    st.title("Sales Insights Assistant")
-    st.write("Ask questions about your sales data in natural language!")
+    st.title("Northwind Database Insights Assistant")
+    st.write("Ask questions about the Northwind trading company data in natural language!")
+    
+    # Add some example questions
+    st.markdown("""
+    ### Try asking questions like:
+    - What are the top 5 best-selling products?
+    - Which customers have placed the most orders?
+    - What were the total sales by category?
+    - Show me all orders from customers in Germany
+    - Which employees have the highest sales?
+    """)
 
     # Initialize components
     db = init_db()
@@ -31,8 +41,8 @@ def main():
 
     # User input
     user_question = st.text_input(
-        "Ask a question about your sales data:",
-        placeholder="e.g., What were the total sales for each product category in 2022?"
+        "Ask a question about the Northwind data:",
+        placeholder="e.g., What are the top 5 products by total sales amount?"
     )
 
     if user_question:
@@ -49,9 +59,12 @@ def main():
             with st.spinner("Fetching results..."):
                 results = db.execute_query(sql_query)
                 
-            if results:
+            if not results.empty:
                 st.write("### Results")
                 st.dataframe(results)
+                
+                # Show summary info
+                st.info(f"Found {len(results)} records")
             else:
                 st.info("No results found for your query.")
 
