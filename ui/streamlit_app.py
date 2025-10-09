@@ -5,6 +5,7 @@ To run: streamlit run ui/streamlit_app.py
 import streamlit as st
 import pandas as pd
 from app.main import run_query_pipeline # Import the main function
+from llm.visualization import decide_and_generate_visualization
 
 def display_results(df: pd.DataFrame, summary: str, sql_query: str = None):
     """Displays the final results in a structured format."""
@@ -55,7 +56,36 @@ def main_app():
         else:
             # Success state
             if df_results is not None and not df_results.empty:
-                display_results(df_results, final_summary, sql_query)
+                    display_results(df_results, final_summary, sql_query)
+
+                    # Attempt to generate and render a visualization using the LLM helper
+                    try:
+                        print("Generating visualization code via Gemini... in streamlit_app.py")
+                        viz_code = decide_and_generate_visualization(user_query, final_summary or "", df_results)
+                    except Exception as e:
+                        viz_code = ""
+                        st.warning(f"Visualization generation failed: {e}")
+
+                    # If LLM returned a non-empty code snippet, execute it in a controlled globals dict
+                    if viz_code:
+                        st.markdown("---")
+                        st.subheader("📈 Suggested Visualization")
+
+                        # Clean code fences if present
+                        viz_code = viz_code.strip()
+                        if viz_code.startswith("```"):
+                            # remove backticks and optional language hint
+                            viz_code = viz_code.split('\n', 1)[-1]
+                            if viz_code.endswith("```"):
+                                viz_code = viz_code[:-3].strip()
+
+                        # Prepare a minimal globals mapping so executed code can access streamlit and the dataframe
+                        safe_globals = {"st": st, "pd": pd, "df_results": df_results}
+
+                        try:
+                            exec(viz_code, safe_globals)
+                        except Exception as e:
+                            st.error(f"Failed to render visualization code: {e}")
             elif final_summary:
                 # Handle queries that return an empty set but a valid summary
                 st.info("Query executed successfully, but returned no data.")

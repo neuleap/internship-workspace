@@ -1,96 +1,76 @@
+"""Main orchestration for the LLM-SQL pipeline.
+
+This module provides `run_query_pipeline` which loads schema metadata,
+generates SQL via the LLM chain, executes it, and restructures results.
 """
-app/main.py: Main orchestration script for the LLM-SQL pipeline.
-"""
-from app.database_utils import extract_schema_metadata, execute_sql_query
-from llm.llm_chain import generate_sql_query, restructure_results
+
+from typing import Optional, Tuple
+import os
+
 import pandas as pd
-from typing import Tuple, Optional, Dict, List, Any
 
-# Define the schema name to be used for the project
-SCHEMA_NAME = "analytics_schema" # Placeholder: Replace with your actual schema name
+from llm import generate_sql_query, restructure_results, get_memory
+from app.database_utils import execute_sql_query
 
-def run_query_pipeline(user_question: str) -> Tuple[Optional[pd.DataFrame], Optional[str], Optional[str], Optional[str]]:
-    """
-    Executes the full end-to-end pipeline: Metadata -> SQL Gen -> Execution -> Restructure.
 
-    Args:
-        user_question: The natural language question from the user.
+def run_query_pipeline(
+    user_question: str,
+) -> Tuple[Optional[pd.DataFrame], Optional[str], Optional[str], Optional[str]]:
+    """Run the pipeline and return (df, summary, error, sql).
 
     Returns:
-        A tuple: (DataFrame of results, human-readable summary, error_message).
+        (DataFrame|None, summary|None, error_message|None, sql_query|None)
     """
-    error_message = None
-    final_df = None
-    summary = None
-    
-    print("--- 1. Loading Schema Metadata from output.json ---")
-    import os
-    import json
-    schema_context = None
+    error_message: Optional[str] = None
+    final_df: Optional[pd.DataFrame] = None
+    summary: Optional[str] = None
+    schema_context: Optional[str] = None
+
     if os.path.exists("output.json"):
-        with open("output.json", "r") as f:
-            schema_context = f.read()
-        print(f"Loaded schema context from output.json. Length: {len(schema_context)} characters")
+        with open("output.json", "r", encoding="utf-8") as fh:
+            schema_context = fh.read()
     else:
-        error_message = "Metadata file output.json not found."
-        print(error_message)
-        return final_df, summary, error_message, sql_query
-    # Optionally, parse JSON if needed:
-    # schema_dict = json.loads(schema_context)
+        return None, None, "Metadata file output.json not found.", None
 
-    # print("schema_context:", schema_context)
+    memory = get_memory()
+    mem_entry = memory.find_similar(user_question, path="conversation_memory.json")
+    if mem_entry:
+        try:
+            final_df = pd.DataFrame(mem_entry.get("results", []))
+        except (ValueError, TypeError):
+            final_df = None
+        return final_df, mem_entry.get("summary"), None, mem_entry.get("sql_query")
 
-    print("--- 2. Generating SQL Query via Gemini ---")
     sql_query = generate_sql_query(schema_context, user_question)
-
-    print("hello")
-    print("sql_query:", sql_query)
-    if "ERROR" in sql_query:
-        
-        error_message = f"SQL Generation Failed: {sql_query}"
-        print(error_message)
-        return final_df, summary, error_message, None
-    
+    if isinstance(sql_query, str) and "ERROR" in sql_query:
+        return None, None, f"SQL Generation Failed: {sql_query}", None
     if sql_query == "QUERY_NOT_POSSIBLE":
-        summary = "I cannot answer this question based on the available database schema. Please rephrase your question."
-        print(f"SQL Generation Result: {sql_query}")
-        return final_df, summary, error_message, None
-    
-    print(f"Generated SQL: {sql_query}")
+        return None, "I cannot answer this question based on the available database schema. Please rephrase your question.", None, None
 
-    print("--- 3. Executing SQL Query ---")
-    raw_results, exec_error = execute_sql_query(sql_query)
-    if exec_error:
-        error_message = f"SQL Execution Failed: {exec_error}"
-        print(error_message)
-        return final_df, summary, error_message, None
-    
-    print(f"Query executed successfully. Rows returned: {len(raw_results)}")
+    raw_results, exec_err = execute_sql_query(sql_query)
+    if exec_err:
+        return None, None, f"SQL Execution Failed: {exec_err}", None
 
-    # Convert results to DataFrame for optional display in UI
     final_df = pd.DataFrame(raw_results)
-    
-    # Convert results to CSV string for clean input to the restructuring LLM
-    if not final_df.empty:
-        sql_results_csv = final_df.to_csv(index=False)
-    else:
-        sql_results_csv = "No results returned."
+    sql_results = final_df.head(20) if not final_df.empty else "No results returned."
+    summary = restructure_results(user_question, sql_results)
 
-    print("--- 4. Restructuring Results via Gemini ---")
-    summary = restructure_results(user_question, sql_results_csv)
-    
-    print("Pipeline Complete.")
-    return final_df, summary, error_message,sql_query
+    try:
+        mem_results = final_df.reset_index().to_dict(orient="records") if final_df is not None else []
+        memory.store(user_question, sql_query, mem_results, summary)
+    except Exception:
+        # Non-fatal
+        pass
 
-if __name__ == '__main__':
-    # Example Usage:
+    return final_df, summary, None, sql_query
+
+
+if __name__ == "__main__":
     example_question = "What are the top 5 selling product categories and their total sales amount?"
-    
-    df_results, final_summary, error = run_query_pipeline(example_question)
-    
-    print("\n" + "="*50)
-    if error:
-        print(f"PIPELINE FAILED: {error}")
+    df_results, final_summary, error_msg, sql_query = run_query_pipeline(example_question)
+    print("\n" + "=" * 50)
+    if error_msg:
+        print(f"PIPELINE FAILED: {error_msg}")
     else:
         print(f"User Question: {example_question}")
         print("\n--- FINAL SUMMARY ---")
@@ -100,4 +80,4 @@ if __name__ == '__main__':
             print(df_results.head())
         else:
             print("No data frame to display.")
-    print("="*50)
+    print("=" * 50)
