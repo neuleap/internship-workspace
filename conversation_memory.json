@@ -1,0 +1,318 @@
+[
+  {
+    "question": "give me top 20 products by sales ",
+    "question_tokens": [
+      "give",
+      "me",
+      "top",
+      "20",
+      "products",
+      "sales"
+    ],
+    "sql_query": "SELECT\n  p.product_name,\n  SUM(od.unit_price * od.quantity * (\n    1 - od.discount\n  )) AS total_sales\nFROM products AS p\nJOIN order_details AS od\n  ON p.product_id = od.product_id\nGROUP BY\n  p.product_id,\n  p.product_name\nORDER BY\n  total_sales DESC\nLIMIT 20;",
+    "summary": "This data displays the top 20 products by their total sales, indicating their performance in revenue generation. \"Côte de Blaye\" leads significantly with over 141,000 in sales, followed by \"Thüringer Rostbratwurst\" and \"Raclette Courdavault,\" highlighting the highest-earning items.",
+    "results": [
+      {
+        "index": 0,
+        "product_name": "Côte de Blaye",
+        "total_sales": 141396.7356273254
+      },
+      {
+        "index": 1,
+        "product_name": "Thüringer Rostbratwurst",
+        "total_sales": 80368.6724385033
+      },
+      {
+        "index": 2,
+        "product_name": "Raclette Courdavault",
+        "total_sales": 71155.69990943
+      },
+      {
+        "index": 3,
+        "product_name": "Tarte au sucre",
+        "total_sales": 47234.969978504174
+      },
+      {
+        "index": 4,
+        "product_name": "Camembert Pierrot",
+        "total_sales": 46825.48029542655
+      },
+      {
+        "index": 5,
+        "product_name": "Gnocchi di nonna Alice",
+        "total_sales": 42593.0598222503
+      },
+      {
+        "index": 6,
+        "product_name": "Manjimup Dried Apples",
+        "total_sales": 41819.65024582073
+      },
+      {
+        "index": 7,
+        "product_name": "Alice Mutton",
+        "total_sales": 32698.380216373203
+      },
+      {
+        "index": 8,
+        "product_name": "Carnarvon Tigers",
+        "total_sales": 29171.874963399023
+      },
+      {
+        "index": 9,
+        "product_name": "Rössle Sauerkraut",
+        "total_sales": 25696.63978933155
+      },
+      {
+        "index": 10,
+        "product_name": "Mozzarella di Giovanni",
+        "total_sales": 24900.12939154029
+      },
+      {
+        "index": 11,
+        "product_name": "Ipoh Coffee",
+        "total_sales": 23526.699842727183
+      },
+      {
+        "index": 12,
+        "product_name": "Sir Rodney's Marmalade",
+        "total_sales": 22563.36029526442
+      },
+      {
+        "index": 13,
+        "product_name": "Uncle Bob's Organic Dried Pears",
+        "total_sales": 22044.29998782277
+      },
+      {
+        "index": 14,
+        "product_name": "Wimmers gute Semmelknödel",
+        "total_sales": 21957.96757586673
+      },
+      {
+        "index": 15,
+        "product_name": "Gudbrandsdalsost",
+        "total_sales": 21942.359829037785
+      },
+      {
+        "index": 16,
+        "product_name": "Ikura",
+        "total_sales": 20867.339869279265
+      },
+      {
+        "index": 17,
+        "product_name": "Perth Pasties",
+        "total_sales": 20574.169932212233
+      },
+      {
+        "index": 18,
+        "product_name": "Gumbär Gummibärchen",
+        "total_sales": 19849.14417082793
+      },
+      {
+        "index": 19,
+        "product_name": "Flotemysost",
+        "total_sales": 19551.025301235914
+      }
+    ],
+    "timestamp": "2025-10-08T11:21:01.404610Z"
+  },
+  {
+    "question": "give me top 10 product by contribution ",
+    "question_tokens": [
+      "give",
+      "me",
+      "top",
+      "10",
+      "product",
+      "contribution"
+    ],
+    "sql_query": "SELECT\n  p.product_name,\n  SUM(od.unit_price * od.quantity * (\n    1 - od.discount\n  )) AS total_contribution\nFROM order_details AS od\nJOIN products AS p\n  ON od.product_id = p.product_id\nGROUP BY\n  p.product_name\nORDER BY\n  total_contribution DESC\nLIMIT 10;",
+    "summary": "This data displays the top 10 products ranked by their total contribution. \"Côte de Blaye\" is the leading contributor, significantly outperforming other products with a contribution of over 141,000. The contributions show a decreasing trend, with the top product contributing almost twice as much as the second-ranked \"Thüringer Rostbratwurst.\"",
+    "results": [
+      {
+        "index": 0,
+        "product_name": "Côte de Blaye",
+        "total_contribution": 141396.7356273254
+      },
+      {
+        "index": 1,
+        "product_name": "Thüringer Rostbratwurst",
+        "total_contribution": 80368.6724385033
+      },
+      {
+        "index": 2,
+        "product_name": "Raclette Courdavault",
+        "total_contribution": 71155.69990943
+      },
+      {
+        "index": 3,
+        "product_name": "Tarte au sucre",
+        "total_contribution": 47234.969978504174
+      },
+      {
+        "index": 4,
+        "product_name": "Camembert Pierrot",
+        "total_contribution": 46825.48029542655
+      },
+      {
+        "index": 5,
+        "product_name": "Gnocchi di nonna Alice",
+        "total_contribution": 42593.0598222503
+      },
+      {
+        "index": 6,
+        "product_name": "Manjimup Dried Apples",
+        "total_contribution": 41819.65024582073
+      },
+      {
+        "index": 7,
+        "product_name": "Alice Mutton",
+        "total_contribution": 32698.380216373203
+      },
+      {
+        "index": 8,
+        "product_name": "Carnarvon Tigers",
+        "total_contribution": 29171.874963399023
+      },
+      {
+        "index": 9,
+        "product_name": "Rössle Sauerkraut",
+        "total_contribution": 25696.63978933155
+      }
+    ],
+    "timestamp": "2025-10-08T11:32:10.068676Z"
+  },
+  {
+    "question": "what is the best selling category ",
+    "question_tokens": [
+      "what",
+      "best",
+      "selling",
+      "category"
+    ],
+    "sql_query": "SELECT\n  p.category_id,\n  SUM(od.quantity * od.unit_price * (\n    1 - od.discount\n  )) AS total_sales\nFROM order_details AS od\nJOIN products AS p\n  ON od.product_id = p.product_id\nGROUP BY\n  p.category_id\nORDER BY\n  total_sales DESC\nLIMIT 1;",
+    "summary": "Based on the provided sample, **category_id 1** is the best-selling category, with total sales of 267,868.18.",
+    "results": [
+      {
+        "index": 0,
+        "category_id": 1,
+        "total_sales": 267868.17978624784
+      }
+    ],
+    "timestamp": "2025-10-08T14:05:27.293706Z"
+  },
+  {
+    "question": "give me top 2 category by sells",
+    "question_tokens": [
+      "give",
+      "me",
+      "top",
+      "category",
+      "sells"
+    ],
+    "sql_query": "SELECT\n  p.category_id,\n  SUM(od.unit_price * od.quantity * (\n    1 - od.discount\n  )) AS total_sells\nFROM order_details AS od\nJOIN products AS p\n  ON od.product_id = p.product_id\nGROUP BY\n  p.category_id\nORDER BY\n  total_sells DESC\nLIMIT 2;",
+    "summary": "This data represents the total sales for the top two product categories. Category 1 generated the highest sales at approximately 267,868, followed by Category 4 with total sales around 234,507. These figures highlight the significant revenue contribution from these top-performing categories.",
+    "results": [
+      {
+        "index": 0,
+        "category_id": 1,
+        "total_sells": 267868.17978624784
+      },
+      {
+        "index": 1,
+        "category_id": 4,
+        "total_sells": 234507.28453057766
+      }
+    ],
+    "timestamp": "2025-10-08T14:07:10.463589Z"
+  },
+  {
+    "question": "comparison of Sales of chai and chang ",
+    "question_tokens": [
+      "comparison",
+      "sales",
+      "chai",
+      "chang"
+    ],
+    "sql_query": "SELECT\n  p.product_name,\n  SUM(od.unit_price * od.quantity * (\n    1 - od.discount\n  )) AS total_sales\nFROM products AS p\nJOIN order_details AS od\n  ON p.product_id = od.product_id\nWHERE\n  p.product_name IN ('Chai', 'Chang')\nGROUP BY\n  p.product_name;",
+    "summary": "This data represents the total sales for two specific products: Chai and Chang. A key insight is that Chang significantly outsold Chai, with total sales of approximately 16,356 compared to Chai's approximately 12,788.",
+    "results": [
+      {
+        "index": 0,
+        "product_name": "Chai",
+        "total_sales": 12788.099919730425
+      },
+      {
+        "index": 1,
+        "product_name": "Chang",
+        "total_sales": 16355.959905386866
+      }
+    ],
+    "timestamp": "2025-10-09T04:49:16.442530Z"
+  },
+  {
+    "question": "give me top 10 product by contribution ",
+    "question_tokens": [
+      "give",
+      "me",
+      "top",
+      "10",
+      "product",
+      "contribution"
+    ],
+    "sql_query": "SELECT\n  p.product_name,\n  SUM(od.unit_price * od.quantity * (\n    1 - od.discount\n  )) AS total_contribution\nFROM order_details AS od\nJOIN products AS p\n  ON od.product_id = p.product_id\nGROUP BY\n  p.product_id,\n  p.product_name\nORDER BY\n  total_contribution DESC\nLIMIT 10;",
+    "summary": "This data displays the top 10 products ranked by their total contribution. \"Côte de Blaye\" is the leading contributor with over 141,000, significantly outperforming other products like \"Thüringer Rostbratwurst\" and \"Raclette Courdavault\" which follow with contributions of approximately 80,000 and 71,000 respectively.",
+    "results": [
+      {
+        "index": 0,
+        "product_name": "Côte de Blaye",
+        "total_contribution": 141396.7356273254
+      },
+      {
+        "index": 1,
+        "product_name": "Thüringer Rostbratwurst",
+        "total_contribution": 80368.6724385033
+      },
+      {
+        "index": 2,
+        "product_name": "Raclette Courdavault",
+        "total_contribution": 71155.69990943
+      },
+      {
+        "index": 3,
+        "product_name": "Tarte au sucre",
+        "total_contribution": 47234.969978504174
+      },
+      {
+        "index": 4,
+        "product_name": "Camembert Pierrot",
+        "total_contribution": 46825.48029542655
+      },
+      {
+        "index": 5,
+        "product_name": "Gnocchi di nonna Alice",
+        "total_contribution": 42593.0598222503
+      },
+      {
+        "index": 6,
+        "product_name": "Manjimup Dried Apples",
+        "total_contribution": 41819.65024582073
+      },
+      {
+        "index": 7,
+        "product_name": "Alice Mutton",
+        "total_contribution": 32698.380216373203
+      },
+      {
+        "index": 8,
+        "product_name": "Carnarvon Tigers",
+        "total_contribution": 29171.874963399023
+      },
+      {
+        "index": 9,
+        "product_name": "Rössle Sauerkraut",
+        "total_contribution": 25696.63978933155
+      }
+    ],
+    "timestamp": "2025-10-09T05:37:20.602289Z"
+  }
+]
